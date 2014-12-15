@@ -74,7 +74,7 @@ dump(A, B) ->
 %%----------------------------------------------------------------------
 %% Function: get_message/1
 %% Purpose: Build a message/request ,
-%% Args:	record
+%% Args:        record
 %% Returns: binary
 %%----------------------------------------------------------------------
 get_message(#mqtt_request{type = connect, clean_start = CleanStart,
@@ -125,23 +125,23 @@ get_message(#mqtt_request{type = publish, topic = Topic, qos = Qos,
 get_message(#mqtt_request{type = subscribe, topic = Topic, qos = Qos},
             #state_rcv{session = MqttSession = #mqtt_session{curr_id = Id}}) ->
     NewMqttSession = MqttSession#mqtt_session{curr_id = Id + 1},
-    Arg = [#sub{topic = Topic, qos = Qos}],
+    Arg = [#sub{topic = Topic}],
     MsgId = NewMqttSession#mqtt_session.curr_id,
-    Message = #mqtt{id = MsgId, type = ?SUBSCRIBE, arg = Arg},
+    Message = #mqtt{id = MsgId, type = ?SUBSCRIBE, qos = Qos, arg = Arg},
     {mqtt_frame:encode(Message), NewMqttSession#mqtt_session{wait = ?SUBACK}};
-get_message(#mqtt_request{type = unsubscribe, topic = Topic},
+get_message(#mqtt_request{type = unsubscribe, topic = Topic, qos = Qos},
             #state_rcv{session = MqttSession = #mqtt_session{curr_id = Id}}) ->
     NewMqttSession = MqttSession#mqtt_session{curr_id = Id + 1},
     Arg = [#sub{topic = Topic}],
     MsgId = NewMqttSession#mqtt_session.curr_id,
-    Message = #mqtt{id = MsgId, type = ?UNSUBSCRIBE, arg = Arg},
+    Message = #mqtt{id = MsgId, type = ?UNSUBSCRIBE, qos = Qos, arg = Arg},
     {mqtt_frame:encode(Message),NewMqttSession#mqtt_session{wait = ?UNSUBACK}}.
 
 %%----------------------------------------------------------------------
 %% Function: parse/2
 %% Purpose: parse the response from the server and keep information
 %%          about the response in State#state_rcv.session
-%% Args:	Data (binary), State (#state_rcv)
+%% Args:        Data (binary), State (#state_rcv)
 %% Returns: {NewState, Options for socket (list), Close = true|false}
 %%----------------------------------------------------------------------
 parse(closed, State) ->
@@ -253,7 +253,7 @@ parse_bidi(Data, State=#state_rcv{acc = Acc, datasize = DataSize}) ->
 %% Returns:  List
 %%----------------------------------------------------------------------
 parse_config(Element, Conf) ->
-	ts_config_mqtt:parse_config(Element, Conf).
+        ts_config_mqtt:parse_config(Element, Conf).
 
 %%----------------------------------------------------------------------
 %% Function: add_dynparams/4
@@ -262,20 +262,20 @@ parse_config(Element, Conf) ->
 %%----------------------------------------------------------------------
 add_dynparams(true, {DynVars, _S},
               Param = #mqtt_request{type = connect, clean_start = CleanStart,
-				    keepalive = KeepAlive, will_topic = WillTopic,
-				    will_qos = WillQos, will_msg = WillMsg,
-				    will_retain = WillRetain, username = UserName,
-				    password = Password},
+                                    keepalive = KeepAlive, will_topic = WillTopic,
+                                    will_qos = WillQos, will_msg = WillMsg,
+                                    will_retain = WillRetain, username = UserName,
+                                    password = Password},
               _HostData) ->
     NewUserName = ts_search:subst(UserName, DynVars),
     NewPassword = ts_search:subst(Password, DynVars),
     Param#mqtt_request{ type = connect,
-			clean_start = CleanStart,
-			keepalive = KeepAlive, will_topic = WillTopic,
-			will_qos = WillQos, will_msg = WillMsg,
-			will_retain = WillRetain,
-			username = NewUserName,
-			password = NewPassword };
+                        clean_start = CleanStart,
+                        keepalive = KeepAlive, will_topic = WillTopic,
+                        will_qos = WillQos, will_msg = WillMsg,
+                        will_retain = WillRetain,
+                        username = NewUserName,
+                        password = NewPassword };
 add_dynparams(true, {DynVars, _S},
               Param = #mqtt_request{type = publish, topic = Topic,
                                     payload = Payload},
