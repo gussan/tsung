@@ -940,7 +940,7 @@ parse(Element = #xmlElement{name=thinktime, attributes=Attrs},
                              {"range", Min2, Max2} ->
                                  {range, Min2 * 1000, Max2 * 1000};
                              "false" ->
-                                 round(Think * 1000)
+                                 Think * 1000
                          end,
                      {Val, Think}
         end,
