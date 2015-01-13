@@ -99,7 +99,7 @@ parse_config(Element = #xmlElement{name = mqtt},
     case Type of
         waitForMessages ->
             ets:insert(Tab, {{CurS#session.id, Id},
-                             {thinktime, Timeout * 1000}});
+                             {thinktime, round(Timeout * 1000)}});
         _ ->
             ets:insert(Tab, {{CurS#session.id, Id}, Msg })
     end,
